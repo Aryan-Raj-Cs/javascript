@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Http cached-control header</title>
+  <!-- <script type="text/javascript" src="./index.js"></script> -->
+  <script type="text/javascript">
+
+async function apiCall() {
+  try {
+    // Make the initial API call
+    const response = await fetch("http://localhost:3002/guardian/api/v1/digitalStore/public/safo/fetchOrderIdDetails");
+    const data = await response.json();
+    console.log('Initial Data:', data);
+
+    // Wait for a few seconds (simulating some time passing)
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    // Make the same API call again
+    const cachedResponse = await fetch("http://localhost:3002/guardian/api/v1/digitalStore/public/safo/fetchOrderIdDetails");
+    const cachedData = await cachedResponse.json();
+    console.log('Cached Data:', cachedData);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+apiCall();
+
+
+
+  </script>
+</head>
+<body>
+    <h1>Http cached-control header</h1>
+
+    <div id="content">
+         Fetch api has response header cached-control:max-age=100 
+         for 100 this api response has been cached when we do call api before 100 second response will be return from disk-cached not from server 
+    </div>
+    <div><button onClick="apiCall()">fetch</button></button></div>
+</body>
+</html>
