@@ -1,6 +1,7 @@
 self.addEventListener('install', function (event) {
+  // event.installModule('http://127.0.0.1:5500/service-worker/test.js')
     event.waitUntil(
-      caches.open('aryan-cache-v3').then(function (cache) {
+      caches.open('aryan-cache-v35').then(function (cache) {
         return cache.addAll([
           'http://127.0.0.1:5500/service-worker/test.js',
           'http://127.0.0.1:5500/service-worker/about.html',
@@ -15,19 +16,38 @@ self.addEventListener('install', function (event) {
        console.log("activated")
  });
 // cache first straighty
- self.addEventListener('fetch', function (event) {
+//  self.addEventListener('fetch', function (event) {
+//   event.respondWith(
+//     caches.match(event.request).then(function (response) {
+//       console.log(event.request.url,"return from cached",response)
+//       return response 
+//       || fetch(event.request).then(function (fetchResponse) {
+//         console.log(event.request.url,"not from cach",response)
+//         return caches.open('aryan-cache-v27').then(function (cache) {
+//           cache.put(event.request, fetchResponse.clone());
+//           return fetchResponse;
+//         });
+//       });
+//     })
+//   );
+// });
+self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then(function (response) {
-      return response 
-      || fetch(event.request).then(function (fetchResponse) {
-        return caches.open('aryan-cache-v3').then(function (cache) {
-          cache.put(event.request, fetchResponse.clone());
-          return fetchResponse;
-        });
-      });
+    caches.match(event.request).then((cachedResponse) => {
+      // Serve from cache if available, otherwise fetch from the network
+      console.log(event.request.url,"return from cach",cachedResponse)
+      if(cachedResponse){
+      return cachedResponse 
+      }
+      else{
+        console.log(event.request.url,"calling request")
+        return fetch(event.request);
+      }
     })
   );
 });
+
+
 
 
 // Inside your service worker (service-worker.js)
