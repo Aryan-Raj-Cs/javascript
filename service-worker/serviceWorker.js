@@ -1,10 +1,10 @@
 self.addEventListener('install', function (event) {
   // event.installModule('http://127.0.0.1:5500/service-worker/test.js')
     event.waitUntil(
-      caches.open('aryan-cache-v35').then(function (cache) {
+      caches.open('aryan-cache-v38').then(function (cache) {
         return cache.addAll([
-          'http://127.0.0.1:5500/service-worker/test.js',
-          'http://127.0.0.1:5500/service-worker/about.html',
+          '/test.js',
+          '/about.html',
           'https://jsonplaceholder.typicode.com/todos/1',
           'https://jsonplaceholder.typicode.com/todos/2'
         ]);

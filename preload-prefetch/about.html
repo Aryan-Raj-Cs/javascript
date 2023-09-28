@@ -5,17 +5,56 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <meta http-equiv="Cache-Control" content="max-age=8910357" />
-  <title>Event Emitter</title>
-  <script type="text/javascript" src="./prefetch.js"></script>
+  <title>Prefetched File</title>
+  <script type="text/javascript" src="./about.js"></script>
+
 </head>
 
 <body>
-  <h1>About</h1>
+  <h1>Prefetched file </h1>
+  <h2>These file is already prefetched from index.html and when we click about.html from index.html this file is not making network request these are being access from browser prefect memeory cache </h2>
+ <br>
+ <p></p>
+  <strong>Difference bw preload and prefetch in terms of parsing and execetation </strong>
   <br>
   <div id="content">
-    Example of preload and prefetching
-  </div>
+    The main difference between preload and prefetch is that preload tells the browser to download and parse a resource as soon as possible, while prefetch tells the browser to download a resource but does not require it to parse it.
 
+    Here is a table that summarizes the difference:
+    <br>
+    <p></p>
+    <table  border="1">
+        <thead>
+          <tr>
+            <th>Characteristic</th>
+            <th>Preload</th>
+            <th>Prefetch</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Downloads the resource</td>
+            <td>Yes</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>Parses the resource</td>
+            <td>Yes</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Executes the resource</td>
+            <td>No</td>
+            <td>No</td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+    <p>When you preload a resource, the browser will download and parse it as soon as possible. This means that the resource will be available to the page as soon as it has loaded. This can be useful for improving the performance of your web application if the resource is essential for the initial loading of the page.</p>
+    
+    <p>When you prefetch a resource, the browser will download it but will not parse it. This means that the resource will not be available to the page until it has been parsed. This can be useful for improving the performance of your web application if the resource is not essential for the initial loading of the page but is likely to be used later.</p>
+
+  </div>
 </body>
 
 </html>

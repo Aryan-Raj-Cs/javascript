@@ -4,60 +4,67 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>preload and precaching</title>
-  <!-- <script type="text/javascript" src="./index.js"></script> -->
-  <link rel="preload" href="./preload.js" as="script">
-  <link rel="prefetch" href="./prefetch.js" as="script">
-  <link rel="prefetch" href="./about.html" >
+  <title>preload and prfetching</title>
+  <link rel="preload" href="./js/index.js" as="script">
+  <link rel="preload" href="./style/stylesheet.css" as="style">
+  <link rel="prefetch" href="./js/about.js" as="script">
+  <link rel="prefetch" href="./about.html">
+  <link rel="prefetch" href="./js/dynamicscript.js" as="script">
+  <!-- we cannot preload html document because of it gets parshed the preloaded file -->
+  <!-- <link rel="preload" href="./about.html" as="document"> -->
+
+  <!-- <link rel="preload" href="https://fonts.gstatic.com/s/lobster/v23/neILzCirqoswsqX9zoKmMw.woff2" as="font"
+    type="font/woff2" crossorigin> -->
+
+  <style>
+    /* @font-face {
+      font-family: 'Lobster';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url(https://fonts.gstatic.com/s/lobster/v23/neILzCirqoswsqX9zoKmMw.woff2) format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+
+    * {
+      font-family: Lobster;
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    } */
+  </style>
+  <script>
+    // work in mozila firefox it will fetch from cache on chrome when deployed
+    function dynamic() {
+      import('./dynamicscript.js').then((res) => {
+        console.log("prefetch from cache")
+      })
+    }
+  </script>
 </head>
 
 <body>
   <h1>Preload and Prefetching</h1>
+  <p>
+   uncomment font and check difference in network tab  with preload and without preload for font
+   <h2>stydy more about font preloading <a href="https://web.dev/codelab-preload-web-fonts/">https://web.dev/codelab-preload-web-fonts/</a></h2>
+  </p>
   <br>
   <a href="./about.html"> about</a>
- <br>
- <p></p>
-  <strong>Difference bw preload and prefetch in terms of parsing and execetation </strong>
   <br>
+  <br>
+  <a href="./fontPreload.html"> Font Preload </a>
+  <br>
+
+  <h3>we have already prefetch <strong>dynamicscript.js file </strong> at butttom click we will dynamicmally import js and found that dynamicscript.js is loaded from <strong>prefetch cache memory</strong> of browser</h3>
+  <button onclick="dynamic()">Dynamic load prefetch script </button>
   <div id="content">
-    The main difference between preload and prefetch is that preload tells the browser to download and parse a resource as soon as possible, while prefetch tells the browser to download a resource but does not require it to parse it.
-
-    Here is a table that summarizes the difference:
-    <br>
-    <p></p>
-    <table  border="1">
-        <thead>
-          <tr>
-            <th>Characteristic</th>
-            <th>Preload</th>
-            <th>Prefetch</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Downloads the resource</td>
-            <td>Yes</td>
-            <td>Yes</td>
-          </tr>
-          <tr>
-            <td>Parses the resource</td>
-            <td>Yes</td>
-            <td>No</td>
-          </tr>
-          <tr>
-            <td>Executes the resource</td>
-            <td>No</td>
-            <td>No</td>
-          </tr>
-        </tbody>
-      </table>
-      <br>
-    <p>When you preload a resource, the browser will download and parse it as soon as possible. This means that the resource will be available to the page as soon as it has loaded. This can be useful for improving the performance of your web application if the resource is essential for the initial loading of the page.</p>
-    
-    <p>When you prefetch a resource, the browser will download it but will not parse it. This means that the resource will not be available to the page until it has been parsed. This can be useful for improving the performance of your web application if the resource is not essential for the initial loading of the page but is likely to be used later.</p>
-
+<h3>Preloading is not render blocking </h3>
+Preloading, by itself, doesn't block rendering. When you use the <link rel="preload"> tag to preload resources like fonts, css,images, or scripts, the browser initiates the download of these resources in the background while continuing to render the rest of the page. It doesn't wait for the preloaded resources to finish downloading before displaying content.
+<h3>Preloaded Files need to be used further genarally in same file  because preloade files does not load and executed by itself </h3>
   </div>
-
+  <script type="text/javascript" src="./js/index.js"></script>
+  <link rel="stylesheet" type="text/css" href="./style/stylesheet.css">
 </body>
 
 </html>
