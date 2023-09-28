@@ -5,6 +5,7 @@ self.addEventListener('install', function (event) {
         return cache.addAll([
           '/test.js',
           '/about.html',
+          './about.js',
           'https://jsonplaceholder.typicode.com/todos/1',
           'https://jsonplaceholder.typicode.com/todos/2'
         ]);
