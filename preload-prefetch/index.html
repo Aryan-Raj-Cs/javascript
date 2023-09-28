@@ -7,14 +7,15 @@
   <title>preload and prfetching</title>
   <link rel="preload" href="./js/index.js" as="script">
   <link rel="preload" href="./style/stylesheet.css" as="style">
+  <!-- <link rel="prefetch" href="./style/stylesheet.css" as="style"> -->
   <link rel="prefetch" href="./js/about.js" as="script">
   <link rel="prefetch" href="./about.html">
   <link rel="prefetch" href="./js/dynamicscript.js" as="script">
   <!-- we cannot preload html document because of it gets parshed the preloaded file -->
   <!-- <link rel="preload" href="./about.html" as="document"> -->
 
-  <!-- <link rel="preload" href="https://fonts.gstatic.com/s/lobster/v23/neILzCirqoswsqX9zoKmMw.woff2" as="font"
-    type="font/woff2" crossorigin> -->
+  <link rel="preload" href="https://fonts.gstatic.com/s/lobster/v23/neILzCirqoswsqX9zoKmMw.woff2" as="font"
+    type="font/woff2" crossorigin>
 
   <style>
     /* @font-face {
@@ -89,7 +90,7 @@ Example:
 
 html
 Copy code
-<link rel="preload" as="style" href="styles.css">
+<!-- <link rel="preload" as="style" href="styles.css"> -->
 Prefetching CSS:
 
 Prefetching, on the other hand, is used to fetch resources that might be needed for future navigation or subsequent pages. It's more about anticipating the user's actions and prefetching resources to make subsequent page loads faster.
@@ -99,7 +100,7 @@ Example:
 
 html
 Copy code
-<link rel="prefetch" href="styles.css">
+<!-- <link rel="prefetch" href="styles.css"> -->
 In summary, preloading is used to fetch essential resources needed for the current page to improve its load time, while prefetching is used to fetch resources that may be needed for future navigation to other pages on the website. Both techniques can help optimize web performance, but they serve different purposes and are used in different contexts.
   </p>
 
@@ -118,13 +119,36 @@ For CSS files, parsing involves reading and interpreting the CSS rules, and exec
 For JavaScript files, parsing involves interpreting the JavaScript code, and execution involves running the code and potentially modifying the DOM or performing other tasks.
 In summary, preloading and prefetching are about optimizing resource loading by fetching them in advance, but parsing and execution of CSS and JavaScript happen when these resources are actually needed and encountered during the standard rendering process of a web page.
 
+<h3>important to verify</h3>
+<p>In CSS, when a URL is used to reference an external resource (such as an image, font, or other file), the browser typically fetches that URL at execution time, not during the initial parsing of the CSS.
 
+  Here's how it works:
+  
+  Parsing CSS:
+  
+  When the browser parses a CSS file, it reads and interprets the CSS rules, selectors, properties, and values.
+  If the CSS rule includes a URL reference (e.g., an image URL in a background-image property or a font URL in a @font-face rule), the browser doesn't fetch the resource immediately during the parsing of the CSS. Instead, it notes the URL as a reference to an external resource.
+  Execution Time (Rendering):
+  
+  Once the CSS is parsed and the DOM (Document Object Model) is constructed, the browser combines the DOM and the CSS to create a Render Tree.
+  During this execution phase (often referred to as the rendering phase), when the browser encounters elements with styles that reference external resources, it initiates the network requests to fetch those resources.
+  The browser fetches the resources in parallel, and when they are downloaded and available, they are applied to the relevant HTML elements according to the CSS rules.
+  This approach allows the browser to start rendering the page as soon as possible, without waiting for the external resources to be fetched. The resources are fetched concurrently, improving the overall page load performance.
+  
+  So, to summarize, URL references in CSS are typically fetched at execution time (rendering) when the browser encounters the HTML elements that require those resources. This asynchronous fetching of resources allows for more efficient page loading.
+  
+  
+  
+  
+  
+  Regenerate
+  </p>
 
 
 
   </p>
   <script type="text/javascript" src="./js/index.js"></script>
-  <link rel="stylesheet" type="text/css" href="./style/stylesheet.css">
+  <!-- <link rel="stylesheet" type="text/css" href="./style/stylesheet.css"> -->
 </body>
 
 </html>
