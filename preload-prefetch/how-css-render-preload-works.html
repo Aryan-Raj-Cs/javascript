@@ -1,0 +1,847 @@
+
+
+
+<!doctype html>
+<html lang="en-US">
+<head data-template-path="https://hacks.mozilla.org/wp-content/themes/Hax">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="w2ocEMd5yV9IsGCjhq-7ls67r4VH-Ob6oWdiZpqjN8U">
+
+  
+  <meta name="title" content="Building the DOM faster: speculative parsing, async, defer and preload – Mozilla Hacks - the Web developer blog">
+  <meta name="description" content="In 2017, the toolbox for making sure your web page loads fast includes everything from minification and asset optimization to caching, CDNs, code splitting and tree shaking. Understanding what goes ...">
+
+    <meta property="og:site_name" content="Mozilla Hacks &#8211; the Web developer blog">
+  <meta property="og:url" content="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload">
+  <meta property="og:title" content="Building the DOM faster: speculative parsing, async, defer and preload – Mozilla Hacks - the Web developer blog">
+  <meta property="og:description" content="In 2017, the toolbox for making sure your web page loads fast includes everything from minification and asset optimization to caching, CDNs, code splitting and tree shaking. Understanding what goes ...">
+  <meta property="og:image" content="https://hacks.mozilla.org/files/2017/09/preview.png">
+  <meta property="og:image:width" content="500">
+  <meta property="og:image:height" content="350">
+
+    <meta property="twitter:title" content="Building the DOM faster: speculative parsing, async, defer and preload – Mozilla Hacks - the Web developer blog">
+  <meta property="twitter:description" content="In 2017, the toolbox for making sure your web page loads fast includes everything from minification and asset optimization to caching, CDNs, code splitting and tree shaking. Understanding what goes ...">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:image" content="https://hacks.mozilla.org/files/2017/09/preview.png">
+  <meta name="twitter:site" content="@mozhacks">
+
+  <link href='//fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://hacks.mozilla.org/wp-content/themes/Hax/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://hacks.mozilla.org/wp-content/themes/Hax/style.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6.0/styles/solarized_light.min.css">
+
+  <script type="text/javascript">
+    window.hacks = {};
+    // http://cfsimplicity.com/61/removing-analytics-clutter-from-campaign-urls
+    var removeUtms  =   function(){
+        var l = window.location;
+        if( l.hash.indexOf( "utm" ) != -1 ){
+            var anchor = l.hash.match(/#(?!utm)[^&]+/);
+            anchor  =   anchor? anchor[0]: '';
+            if(!anchor && window.history.replaceState){
+                history.replaceState({},'', l.pathname + l.search);
+            } else {
+                l.hash = anchor;
+            }
+        };
+    };
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-35433268-8'],
+              ['_setAllowAnchor', true]);
+    _gaq.push (['_gat._anonymizeIp']);
+    _gaq.push(['_trackPageview']);
+    _gaq.push( removeUtms );
+    (function(d, k) {
+      var ga = d.createElement(k); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = 'https://ssl.google-analytics.com/ga.js';
+      var s = d.getElementsByTagName(k)[0]; s.parentNode.insertBefore(ga, s);
+    })(document, 'script');
+  </script>
+
+  <meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' />
+<meta name="blog-name" content="Mozilla Hacks - the Web developer blog" />
+
+	<!-- This site is optimized with the Yoast SEO plugin v20.12 - https://yoast.com/wordpress/plugins/seo/ -->
+	<title>Building the DOM faster: speculative parsing, async, defer and preload - Mozilla Hacks - the Web developer blog</title>
+	<link rel="canonical" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/" />
+	<meta name="twitter:label1" content="Written by" />
+	<meta name="twitter:data1" content="Milica Mihajlija" />
+	<meta name="twitter:label2" content="Est. reading time" />
+	<meta name="twitter:data2" content="12 minutes" />
+	<script type="application/ld+json" class="yoast-schema-graph">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/","url":"https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/","name":"Building the DOM faster: speculative parsing, async, defer and preload - Mozilla Hacks - the Web developer blog","isPartOf":{"@id":"https://hacks.mozilla.org/#website"},"primaryImageOfPage":{"@id":"https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#primaryimage"},"image":{"@id":"https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#primaryimage"},"thumbnailUrl":"https://hacks.mozilla.org/files/2017/09/preview.png","datePublished":"2017-09-14T14:54:53+00:00","dateModified":"2017-09-21T19:55:24+00:00","author":{"@id":"https://hacks.mozilla.org/#/schema/person/e27bd7cb1b62ec3af82038573446bc4b"},"breadcrumb":{"@id":"https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#breadcrumb"},"inLanguage":"en-US","potentialAction":[{"@type":"ReadAction","target":["https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/"]}]},{"@type":"ImageObject","inLanguage":"en-US","@id":"https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#primaryimage","url":"https://hacks.mozilla.org/files/2017/09/preview.png","contentUrl":"https://hacks.mozilla.org/files/2017/09/preview.png","width":500,"height":350},{"@type":"BreadcrumbList","@id":"https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://hacks.mozilla.org/"},{"@type":"ListItem","position":2,"name":"Articles","item":"https://hacks.mozilla.org/articles/"},{"@type":"ListItem","position":3,"name":"Building the DOM faster: speculative parsing, async, defer and preload"}]},{"@type":"WebSite","@id":"https://hacks.mozilla.org/#website","url":"https://hacks.mozilla.org/","name":"Mozilla Hacks - the Web developer blog","description":"hacks.mozilla.org","potentialAction":[{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://hacks.mozilla.org/?s={search_term_string}"},"query-input":"required name=search_term_string"}],"inLanguage":"en-US"},{"@type":"Person","@id":"https://hacks.mozilla.org/#/schema/person/e27bd7cb1b62ec3af82038573446bc4b","name":"Milica Mihajlija","image":{"@type":"ImageObject","inLanguage":"en-US","@id":"https://hacks.mozilla.org/#/schema/person/image/04c4e062db3a5acb5adc05ba4a5ba752","url":"https://secure.gravatar.com/avatar/73aca9df10726dfe88a926a8413ea351?s=96&d=mm&r=g","contentUrl":"https://secure.gravatar.com/avatar/73aca9df10726dfe88a926a8413ea351?s=96&d=mm&r=g","caption":"Milica Mihajlija"},"sameAs":["https://twitter.com/bibydigital"],"url":"https://hacks.mozilla.org/author/mihajlijagmail-com/"}]}</script>
+	<!-- / Yoast SEO plugin. -->
+
+
+<link rel="alternate" type="application/rss+xml" title="Mozilla Hacks - the Web developer blog &raquo; Feed" href="https://hacks.mozilla.org/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Mozilla Hacks - the Web developer blog &raquo; Comments Feed" href="https://hacks.mozilla.org/comments/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Mozilla Hacks - the Web developer blog &raquo; Building the DOM faster: speculative parsing, async, defer and preload Comments Feed" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/feed/" />
+<link rel='stylesheet' id='wp-block-library-css' href='https://hacks.mozilla.org/wp-includes/css/dist/block-library/style.min.css?ver=6.3' type='text/css' media='all' />
+<style id='safe-svg-svg-icon-style-inline-css' type='text/css'>
+.safe-svg-cover .safe-svg-inside{display:inline-block;max-width:100%}.safe-svg-cover svg{height:100%;max-height:100%;max-width:100%;width:100%}
+
+</style>
+<style id='classic-theme-styles-inline-css' type='text/css'>
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+</style>
+<style id='global-styles-inline-css' type='text/css'>
+body{--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgba(255, 255, 255, 1), 6px 6px rgba(0, 0, 0, 1);--wp--preset--shadow--crisp: 6px 6px 0px rgba(0, 0, 0, 1);}:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flow > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}body .is-layout-flow > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}body .is-layout-flow > .aligncenter{margin-left: auto !important;margin-right: auto !important;}body .is-layout-constrained > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}body .is-layout-constrained > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}body .is-layout-constrained > .aligncenter{margin-left: auto !important;margin-right: auto !important;}body .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)){max-width: var(--wp--style--global--content-size);margin-left: auto !important;margin-right: auto !important;}body .is-layout-constrained > .alignwide{max-width: var(--wp--style--global--wide-size);}body .is-layout-flex{display: flex;}body .is-layout-flex{flex-wrap: wrap;align-items: center;}body .is-layout-flex > *{margin: 0;}body .is-layout-grid{display: grid;}body .is-layout-grid > *{margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+.wp-block-navigation a:where(:not(.wp-element-button)){color: inherit;}
+:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}
+:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}
+.wp-block-pullquote{font-size: 1.5em;line-height: 1.6;}
+</style>
+<script type='text/javascript' src='https://hacks.mozilla.org/wp-includes/js/jquery/jquery.min.js?ver=3.7.0' id='jquery-core-js'></script>
+<script type='text/javascript' src='https://hacks.mozilla.org/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1' id='jquery-migrate-js'></script>
+<script type='text/javascript' src='https://hacks.mozilla.org/wp-content/themes/Hax/js/analytics.js?ver=6.3' id='analytics-js'></script>
+<link rel="https://api.w.org/" href="https://hacks.mozilla.org/wp-json/" /><link rel="alternate" type="application/json" href="https://hacks.mozilla.org/wp-json/wp/v2/posts/31239" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://hacks.mozilla.org/xmlrpc.php?rsd" />
+<link rel='shortlink' href='https://hacks.mozilla.org/?p=31239' />
+<link rel="alternate" type="application/json+oembed" href="https://hacks.mozilla.org/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fhacks.mozilla.org%2F2017%2F09%2Fbuilding-the-dom-faster-speculative-parsing-async-defer-and-preload%2F" />
+<link rel="alternate" type="text/xml+oembed" href="https://hacks.mozilla.org/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fhacks.mozilla.org%2F2017%2F09%2Fbuilding-the-dom-faster-speculative-parsing-async-defer-and-preload%2F&#038;format=xml" />
+<link rel="shortcut icon" type="image/x-icon" href="https://hacks.mozilla.org/wp-content/themes/Hax/favicon.ico" /><style>#wpadminbar #wp-admin-bar-site-name>.ab-item:before { content: none !important;}li#wp-admin-bar-site-name a { background: url( "https://hacks.mozilla.org/wp-content/themes/Hax/favicon.ico" ) left center/20px no-repeat !important; padding-left: 21px !important; background-size: 20px !important; } li#wp-admin-bar-site-name { margin-left: 5px !important; } li#wp-admin-bar-site-name {} #wp-admin-bar-site-name div a { background: none !important; }
+</style></head>
+<body>
+  <div class="outer-wrapper">
+    <header class="section section--fullwidth header">
+      <div class="masthead row">
+        <div class="branding block block--3">
+          <h1>
+            <a href="https://hacks.mozilla.org">
+              <img class="branding__logo" src="https://hacks.mozilla.org/wp-content/themes/Hax/img/mdn-logo-mono.svg">
+              <img class="branding__wordmark" src="https://hacks.mozilla.org/wp-content/themes/Hax/img/wordmark.svg" alt="Mozilla">
+              <span class="branding__title">Hac<span class="logo-askew">k</span>s</span>
+            </a>
+          </h1>
+        </div>
+        <div class="search block block--2">
+          <form class="search__form" method="get" action="https://hacks.mozilla.org/">
+            <input type="search" name="s" class="search__input" placeholder="Search Mozilla Hacks" value="">
+            <i class="fa fa-search search__badge"></i>
+          </form>
+        </div>
+        <nav class="social">
+          <a class="social__link youtube" href="http://www.youtube.com/user/mozhacks" title="YouTube"><i class="fa fa-youtube" aria-hidden="true"></i><span>Hacks on YouTube</span></a>
+          <a class="social__link twitter" href="https://twitter.com/mozhacks" title="Twitter"><i class="fa fa-twitter" aria-hidden="true"></i><span>@mozhacks on Twitter</span></a>
+          <a class="social__link rss" href="https://hacks.mozilla.org/feed/" title="RSS Feed"><i class="fa fa-rss" aria-hidden="true"></i><span>Hacks RSS Feed</span></a>
+          <a class="fx-button" href="https://www.mozilla.org/firefox/download/thanks/?utm_source=hacks.mozilla.org&utm_medium=referral&utm_campaign=header-download-button&utm_content=header-download-button">Download Firefox</a>
+        </nav>
+      </div>
+    </header>
+
+  
+<div id="content-head" class="section">
+  <h1 class="post__title">Building the DOM faster: speculative parsing, async, defer and preload</h1>
+  <div class="byline">
+    <h3 class="post__author">
+                      <img alt='' src='https://secure.gravatar.com/avatar/73aca9df10726dfe88a926a8413ea351?s=64&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/73aca9df10726dfe88a926a8413ea351?s=128&#038;d=mm&#038;r=g 2x' class='avatar avatar-64 photo' height='64' width='64' loading='lazy' decoding='async'/>        By
+                                        <a class="url" href="https://twitter.com/bibydigital" rel="external me">Milica Mihajlija</a>                            </h2>
+    <div class="post__meta">
+      Posted on
+      <abbr class="published" title="2017-09-14T07:54:53-07:00">
+        September 14, 2017      </abbr>
+      <span class="entry-cat">in
+        <a href="https://hacks.mozilla.org/category/dom/" rel="category tag" title="View all posts in DOM" >DOM</a>, <a href="https://hacks.mozilla.org/category/featured/" rel="category tag" title="View all posts in Featured Article" >Featured Article</a>,  and <a href="https://hacks.mozilla.org/category/firefox/firefox-development-highlights/" rel="category tag" title="View all posts in Firefox Development Highlights" >Firefox Development Highlights</a>      </span>
+            <div class="socialshare" data-type="bubbles"></div>
+    </div>
+  </div>
+</div>
+
+<main id="content-main" class="section article">
+  <article class="post" role="article">
+    <p>In 2017, the toolbox for making sure your web page loads fast includes everything from minification and asset optimization to caching, CDNs, code splitting and tree shaking. However, you can get big performance boosts with just a few keywords and mindful code structuring, even if you&#8217;re not yet familiar with the concepts above and you&#8217;re not sure how to get started.</p>
+<p>The fresh web standard <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content"><code>&lt;link rel="preload"&gt;</code></a>, that allows you to load critical resources faster, is coming to Firefox later this month. You can already try it out in <a href="https://www.mozilla.org/en-US/firefox/57.0a1/releasenotes/" target="_blank" rel="noopener">Firefox Nightly</a> or <a href="https://www.mozilla.org/en-US/firefox/developer/">Developer Edition</a>, and in the meantime, this is a great chance to review some fundamentals and dive deeper into performance associated with parsing the DOM.</p>
+<p>Understanding what goes on inside a browser is the most powerful tool for every web developer. We’ll look at how browsers interpret your code and how they help you load pages faster with speculative parsing. We’ll break down how <code>defer</code> and <code>async</code> work and how you can leverage the new keyword <code>preload</code>.</p>
+<h2>Building blocks</h2>
+<p>HTML describes the structure of a web page. To make any sense of the HTML, browsers first have to convert it into a format they understand &#8211; the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction" target="_blank" rel="noopener">Document Object Model</a>, or DOM. Browser engines have a special piece of code called a parser that&#8217;s used to convert data from one format to another. An HTML parser converts data from HTML into the DOM.</p>
+<p>In HTML, nesting defines the parent-child relationships between different tags. In the DOM, objects are linked in a tree data structure capturing those relationships. Each HTML tag is represented by a node of the tree (a DOM node).</p>
+<p>The browser builds up the DOM bit by bit. As soon as the first chunks of code come in, it starts parsing the HTML, adding nodes to the tree structure.</p>
+<p><a href="https://hacks.mozilla.org/files/2017/09/ezgif-2-2688553063.gif"><img decoding="async" fetchpriority="high" class="aligncenter wp-image-31246 size-full" src="https://hacks.mozilla.org/files/2017/09/ezgif-2-2688553063.gif" alt="" width="600" height="202" /></a></p>
+<p>The DOM has two roles: it is the object representation of the HTML document, and it acts as an interface connecting the page to the outside world, like JavaScript. When you call <code>document.getElementById()</code>, the element that is returned is a DOM node. Each DOM node has many functions you can use to access and change it, and what the user sees changes accordingly.</p>
+<p><a href="https://hacks.mozilla.org/files/2017/09/ezgif-2-01a1ded8c4.gif"><img decoding="async" class="aligncenter wp-image-31245 size-full" src="https://hacks.mozilla.org/files/2017/09/ezgif-2-01a1ded8c4.gif" alt="" width="595" height="229" /></a></p>
+<p>CSS styles found on a web page are mapped onto the CSSOM &#8211; the <a href="https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model" target="_blank" rel="noopener">CSS Object Model</a>. It is much like the DOM, but for the CSS rather than the HTML. Unlike the DOM, it cannot be built incrementally. Because CSS rules can override each other, the browser engine has to do complex calculations to figure out how the CSS code applies to the DOM.</p>
+<div></div>
+<p><a href="https://hacks.mozilla.org/files/2017/09/cssom-1.png"><img decoding="async" class="aligncenter wp-image-31265 size-large" src="https://hacks.mozilla.org/files/2017/09/cssom-1-500x126.png" alt="" width="500" height="126" srcset="https://hacks.mozilla.org/files/2017/09/cssom-1-500x126.png 500w, https://hacks.mozilla.org/files/2017/09/cssom-1-250x63.png 250w, https://hacks.mozilla.org/files/2017/09/cssom-1-768x194.png 768w, https://hacks.mozilla.org/files/2017/09/cssom-1.png 1501w" sizes="(max-width: 500px) 100vw, 500px" /></a></p>
+<div></div>
+<p>&nbsp;</p>
+<h2>The history of the &lt;script&gt; tag</h2>
+<p>As the browser is constructing the DOM, if it comes across a <code>&lt;script&gt;...&lt;/script&gt;</code> tag in the HTML, it must execute it right away. If the script is external, it has to download the script first.</p>
+<p>Back in the old days, in order to execute a script, parsing had to be paused. It would only start up again after the JavaScript engine had executed code from a script.</p>
+<p><a href="https://hacks.mozilla.org/files/2017/09/script-bold@2x.png"><img decoding="async" loading="lazy" class="aligncenter size-large wp-image-31264" src="https://hacks.mozilla.org/files/2017/09/script-bold@2x-500x150.png" alt="" width="500" height="150" srcset="https://hacks.mozilla.org/files/2017/09/script-bold@2x-500x150.png 500w, https://hacks.mozilla.org/files/2017/09/script-bold@2x-250x75.png 250w, https://hacks.mozilla.org/files/2017/09/script-bold@2x-768x230.png 768w, https://hacks.mozilla.org/files/2017/09/script-bold@2x.png 1000w" sizes="(max-width: 500px) 100vw, 500px" /></a></p>
+<p>Why did the parsing have to stop? Well, scripts can change both the HTML and its product―the DOM. Scripts can change the DOM structure by adding nodes with <code>document.createElement()</code>. To change the HTML, scripts can add content with the notorious <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/write" target="_blank" rel="noopener"><code>document.write()</code></a> function. It’s notorious because it can change the HTML in ways that can affect further parsing. For example, the function could insert an opening comment tag making the rest of the HTML invalid.</p>
+<p><a href="https://hacks.mozilla.org/files/2017/09/image.gif" target="_blank" rel="noopener"><img decoding="async" loading="lazy" class="aligncenter wp-image-31247 size-full" src="https://hacks.mozilla.org/files/2017/09/image.gif" alt="" width="500" height="200" /></a></p>
+<p>Scripts can also query something about the DOM, and if that happens while the DOM is still being constructed, it could return unexpected results.</p>
+<div></div>
+<p><a href="https://hacks.mozilla.org/files/2017/09/docwrite.png"><img decoding="async" loading="lazy" class="aligncenter wp-image-31251 size-large" src="https://hacks.mozilla.org/files/2017/09/docwrite-500x217.png" alt="" width="500" height="217" srcset="https://hacks.mozilla.org/files/2017/09/docwrite-500x217.png 500w, https://hacks.mozilla.org/files/2017/09/docwrite-250x108.png 250w, https://hacks.mozilla.org/files/2017/09/docwrite-768x333.png 768w, https://hacks.mozilla.org/files/2017/09/docwrite.png 1663w" sizes="(max-width: 500px) 100vw, 500px" /></a></p>
+<p><code>document.write()</code> is a legacy function that can break your page in unexpected ways and you shouldn’t use it, even though browsers still support it. For these reasons, browsers have developed sophisticated techniques to get around the performance issues caused by script blocking that I will explain shortly.</p>
+<h2>What about CSS?</h2>
+<p>JavaScript blocks parsing because it can modify the document. CSS can’t modify the document, so it seems like there is no reason for it to block parsing, right?</p>
+<p>However, what if a script asks for style information that hasn’t been parsed yet? The browser doesn’t know what the script is about to execute—it may ask for something like the DOM node’s <code>background-color</code> which depends on the style sheet, or it may expect to access the CSSOM directly.</p>
+<p><a href="https://hacks.mozilla.org/files/2017/09/assembling-2.png"><img decoding="async" loading="lazy" class="aligncenter wp-image-31248 size-large" src="https://hacks.mozilla.org/files/2017/09/assembling-2-500x302.png" alt="" width="500" height="302" srcset="https://hacks.mozilla.org/files/2017/09/assembling-2-500x302.png 500w, https://hacks.mozilla.org/files/2017/09/assembling-2-250x151.png 250w, https://hacks.mozilla.org/files/2017/09/assembling-2-768x464.png 768w, https://hacks.mozilla.org/files/2017/09/assembling-2.png 1663w" sizes="(max-width: 500px) 100vw, 500px" /></a></p>
+<p>Because of this, CSS may block parsing depending on the order of external style sheets and scripts in the document. If there are external style sheets placed before scripts in the document, the construction of DOM and CSSOM objects can interfere with each other. When the parser gets to a script tag, DOM construction cannot proceed until the JavaScript finishes executing, and the JavaScript cannot be executed until the CSS is downloaded, parsed, and the CSSOM is available.</p>
+<p><a href="https://hacks.mozilla.org/files/2017/09/blocking-bold@2x-1.png"><img decoding="async" loading="lazy" class="aligncenter size-large wp-image-31283" src="https://hacks.mozilla.org/files/2017/09/blocking-bold@2x-1-500x162.png" alt="" width="500" height="162" srcset="https://hacks.mozilla.org/files/2017/09/blocking-bold@2x-1-500x162.png 500w, https://hacks.mozilla.org/files/2017/09/blocking-bold@2x-1-250x81.png 250w, https://hacks.mozilla.org/files/2017/09/blocking-bold@2x-1-768x248.png 768w, https://hacks.mozilla.org/files/2017/09/blocking-bold@2x-1.png 1000w" sizes="(max-width: 500px) 100vw, 500px" /></a></p>
+<p>Another thing to keep in mind is that even if the CSS doesn’t block DOM construction, it blocks rendering. The browser won’t display anything until it has both the DOM and the CSSOM. This is because pages without CSS are often unusable. If a browser showed you a messy page without CSS, then a few moments later snapped into a styled page, the shifting content and sudden visual changes would make a turbulent user experience.</p>
+<p><iframe loading="lazy" style="width: 100%;" title="Flash of Unstyled Content" src="//codepen.io/micikato/embed/preview/JroPNm/?height=505&amp;theme-id=0&amp;default-tab=result&amp;embed-version=2" width="500" height="500" frameborder="no" scrolling="no" allowfullscreen="allowfullscreen">See the Pen <a href="https://codepen.io/micikato/pen/JroPNm/">Flash of Unstyled Content</a> by Milica (<a href="https://codepen.io/micikato">@micikato</a>) on <a href="https://codepen.io">CodePen</a>.<br />
+</iframe></p>
+<p><em>That poor user experience has a name &#8211; Flash of Unstyled Content or FOUC</em></p>
+<p>To get around these issues, you should aim to deliver the CSS as soon as possible. Recall the popular &#8220;styles at the top, scripts at the bottom&#8221; best practice? Now you know why it was there!</p>
+<h2>Back to the future &#8211; speculative parsing</h2>
+<p>Pausing the parser whenever a script is encountered means that every script you load delays the discovery of the rest of the resources that were linked in the HTML.</p>
+<p>If you have a few scripts and images to load, for example&#8211;</p>
+<pre><code class="js">&lt;script src="slider.js"&gt;&lt;/script&gt;
+&lt;script src="animate.js"&gt;&lt;/script&gt;
+&lt;script src="cookie.js"&gt;&lt;/script&gt;
+&lt;img src="slide1.png"&gt;
+&lt;img src="slide2.png"&gt;</code></pre>
+<p>&#8211;the process used to go like this:</p>
+<p><a href="https://hacks.mozilla.org/files/2017/09/waterfall-1-bold@2x.png" target="_blank" rel="noopener"><img decoding="async" loading="lazy" class="aligncenter wp-image-31261 size-large" src="https://hacks.mozilla.org/files/2017/09/waterfall-1-bold@2x-500x208.png" alt="" width="500" height="208" srcset="https://hacks.mozilla.org/files/2017/09/waterfall-1-bold@2x-500x208.png 500w, https://hacks.mozilla.org/files/2017/09/waterfall-1-bold@2x-250x104.png 250w, https://hacks.mozilla.org/files/2017/09/waterfall-1-bold@2x-768x319.png 768w, https://hacks.mozilla.org/files/2017/09/waterfall-1-bold@2x.png 1000w" sizes="(max-width: 500px) 100vw, 500px" /></a></p>
+<p>&nbsp;</p>
+<p>That changed around 2008 when IE introduced something they called &#8220;the lookahead downloader&#8221;. It was a way to keep downloading the files that were needed while the synchronous script was being executed. Firefox, Chrome and Safari soon followed, and today most browsers use this technique under different names. Chrome and Safari have “the preload scanner” and Firefox &#8211; the speculative parser.</p>
+<p>The idea is: even though it’s not safe to build the DOM while executing a script, you can still parse the HTML to see what other resources need to be retrieved. Discovered files are added to a list and start downloading in the background on parallel connections. By the time the script finishes executing, the files may have already been downloaded.</p>
+<p>The waterfall chart for the example above now looks more like this:</p>
+<p><a href="https://hacks.mozilla.org/files/2017/09/waterfall-2-bold@2x.png" target="_blank" rel="noopener"><img decoding="async" loading="lazy" class="aligncenter wp-image-31262 size-large" src="https://hacks.mozilla.org/files/2017/09/waterfall-2-bold@2x-500x208.png" alt="" width="500" height="208" srcset="https://hacks.mozilla.org/files/2017/09/waterfall-2-bold@2x-500x208.png 500w, https://hacks.mozilla.org/files/2017/09/waterfall-2-bold@2x-250x104.png 250w, https://hacks.mozilla.org/files/2017/09/waterfall-2-bold@2x-768x319.png 768w, https://hacks.mozilla.org/files/2017/09/waterfall-2-bold@2x.png 1000w" sizes="(max-width: 500px) 100vw, 500px" /></a></p>
+<p>The download requests triggered this way are called “speculative” because it is still possible that the script could change the HTML structure (remember <code>document.write</code> ?), resulting in wasted guesswork. While this is possible, it is not common, and that&#8217;s why speculative parsing still gives big performance improvements.</p>
+<p>While other browsers only preload linked resources this way, in Firefox the HTML parser also runs the DOM tree construction algorithm speculatively. The upside is that when a speculation succeeds, there&#8217;s no need to re-parse a part of the file to actually compose the DOM. The downside is that there&#8217;s more work lost if and when the speculation fails.</p>
+<h2>(Pre)loading stuff</h2>
+<p>This manner of resource loading delivers a significant performance boost, and you don’t need to do anything special to take advantage of it. However, as a web developer, knowing how speculative parsing works can help you get the most out of it.</p>
+<p>The set of things that can be preloaded varies between browsers. All major browsers preload:</p>
+<ul>
+<li>scripts</li>
+<li>external CSS</li>
+<li>and images from the <code>&lt;img&gt;</code> tag</li>
+</ul>
+<p>Firefox also preloads the <code>poster</code> attribute of video elements, while Chrome and Safari preload <code>@import</code> rules from inlined styles.</p>
+<p>There are limits to how many files a browser can download in parallel. The limits vary between browsers and depend on many factors, like whether you’re downloading all files from one or from several different servers and whether you are using HTTP/1.1 or HTTP/2 protocol. To render the page as quickly as possible, browsers optimize downloads by assigning priority to each file. To figure out these priorities, they follow complex schemes based on resource type, position in the markup, and progress of the page rendering.</p>
+<p>While doing speculative parsing, the browser does not execute inline JavaScript blocks. This means that it won&#8217;t discover any script-injected resources, and those will likely be last in line in the fetching queue.</p>
+<pre><code class="js">var script = document.createElement('script');
+script.src = "//somehost.com/widget.js";
+document.getElementsByTagName('head')[0].appendChild(script);</code></pre>
+<p>You should make it easy for the browser to access important resources as soon as possible. You can either put them in HTML tags or include the loading script inline and early in the document. However, sometimes you want some resources to load later because they are less important. In that case, you can hide them from the speculative parser by loading them with JavaScript late in the document.</p>
+<p>You can also check out this <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Optimizing_your_pages_for_speculative_parsing" target="_blank" rel="noopener">MDN guide</a> on how to optimize your pages for speculative parsing.</p>
+<h2>defer and async</h2>
+<p>Still, synchronous scripts blocking the parser remains an issue. And not all scripts are equally important for the user experience, such as those for tracking and analytics. Solution? Make it possible to load these less important scripts asynchronously.</p>
+<p>The <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#Attributes" target="_blank" rel="noopener"><code>defer</code> and <code>async</code> attributes</a> were introduced to give developers a way to tell the browser which scripts to handle asynchronously.</p>
+<p>Both of these attributes tell the browser that it may go on parsing the HTML while loading the script “in background”, and then execute the script after it loads. This way, script downloads don’t block DOM construction and page rendering. Result: the user can see the page before all scripts have finished loading.</p>
+<p>The difference between <code>defer</code> and <code>async</code> is which moment they start executing the scripts.</p>
+<p><code>defer</code> was introduced before <code>async</code>. Its execution starts after parsing is completely finished, but before the <a href="https://developer.mozilla.org/en-US/docs/Web/Events/DOMContentLoaded" target="_blank" rel="noopener"><code>DOMContentLoaded</code></a> event. It guarantees scripts will be executed in the order they appear in the HTML and will not block the parser.</p>
+<p><a href="https://hacks.mozilla.org/files/2017/09/defer-bold@2x.png" target="_blank" rel="noopener"><img decoding="async" loading="lazy" class="aligncenter wp-image-31260 size-large" src="https://hacks.mozilla.org/files/2017/09/defer-bold@2x-500x164.png" alt="" width="500" height="164" srcset="https://hacks.mozilla.org/files/2017/09/defer-bold@2x-500x164.png 500w, https://hacks.mozilla.org/files/2017/09/defer-bold@2x-250x82.png 250w, https://hacks.mozilla.org/files/2017/09/defer-bold@2x-768x251.png 768w, https://hacks.mozilla.org/files/2017/09/defer-bold@2x.png 1000w" sizes="(max-width: 500px) 100vw, 500px" /></a></p>
+<p><code>async</code> scripts execute at the first opportunity after they finish downloading and before the window&#8217;s <a href="https://developer.mozilla.org/en-US/docs/Web/Events/load" target="_blank" rel="noopener"><code>load</code></a> event. This means it&#8217;s possible (and likely) that async scripts are not executed in the order in which they appear in the HTML. It also means they can interrupt DOM building.</p>
+<p>Wherever they are specified, <code>async</code> scripts load at a low priority. They often load after all other scripts, without blocking DOM building. However, if an <code>async</code> script finishes downloading sooner, its execution can block DOM building and all synchronous scripts that finish downloading afterwards.</p>
+<p><a href="https://hacks.mozilla.org/files/2017/09/async-bold@2x.png" target="_blank" rel="noopener"><img decoding="async" loading="lazy" class="aligncenter wp-image-31258 size-large" src="https://hacks.mozilla.org/files/2017/09/async-bold@2x-500x151.png" alt="" width="500" height="151" srcset="https://hacks.mozilla.org/files/2017/09/async-bold@2x-500x151.png 500w, https://hacks.mozilla.org/files/2017/09/async-bold@2x-250x76.png 250w, https://hacks.mozilla.org/files/2017/09/async-bold@2x-768x232.png 768w, https://hacks.mozilla.org/files/2017/09/async-bold@2x.png 1000w" sizes="(max-width: 500px) 100vw, 500px" /></a></p>
+<p><em>Note: Attributes async and defer work only for external scripts. They are ignored if there’s no <code>src</code>.</em></p>
+<h2>preload</h2>
+<p><code>async</code> and <code>defer</code> are great if you want to put off handling some scripts, but what about stuff on your web page that’s critical for user experience? Speculative parsers are handy, but they preload only a handful of resource types and follow their own logic. The general goal is to deliver CSS first because it blocks rendering. Synchronous scripts will always have higher priority than asynchronous. Images visible within the viewport should be downloaded before those below the fold. And there are also fonts, videos, SVGs… In short &#8211; it’s complicated.</p>
+<p>As an author, you know which resources are the most important for rendering your page. Some of them are often buried in CSS or scripts and it can take the browser quite a while before it even discovers them. For those important resources you can now use <code>&lt;link rel="preload"&gt;</code> to communicate to the browser that you want to load them as soon as possible.</p>
+<p>All you need to write is:</p>
+<pre><code>&lt;link rel="preload" href="very_important.js" as="script"&gt;</code></pre>
+<p>You can link pretty much anything and the <code>as</code> attribute tells the browser what it will be downloading. Some of the possible values are:</p>
+<ul>
+<li><code>script</code></li>
+<li><code>style</code></li>
+<li><code>image</code></li>
+<li><code>font</code></li>
+<li><code>audio</code></li>
+<li><code>video</code></li>
+</ul>
+<p>You can check out the rest of the content types on <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content#What_types_of_content_can_be_preloaded" target="_blank" rel="noopener">MDN</a>.</p>
+<p>Fonts are probably the most important thing that gets hidden in the CSS. They are critical for rendering the text on the page, but they don’t get loaded until browser is sure that they are going to be used. That check happens only after CSS has been parsed, and applied, and the browser has matched CSS rules to the DOM nodes. This happens fairly late in the page loading process and it often results in an unnecessary delay in text rendering. You can avoid it by using the preload attribute when you link fonts.</p>
+<p>One thing to pay attention to when preloading fonts is that you also have to set the <code><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS" target="_blank" rel="noopener">crossorigin</a></code> attribute even if the font is on the same domain:</p>
+<pre><code>&lt;link rel="preload" href="font.woff" as="font" crossorigin&gt;</code></pre>
+<p>The preload feature has limited support at the moment as the browsers are still rolling it out, but you can check the progress <a href="https://caniuse.com/#search=preload" target="_blank" rel="noopener">here</a>.</p>
+<h2>Conclusion</h2>
+<p>Browsers are complex beasts that have been evolving since the 90s. We’ve covered some of the quirks from that legacy and some of the newest standards in web development. Writing your code with these guidelines will help you pick the best strategies for delivering a smooth browsing experience.</p>
+<p>If you’re excited to learn more about how browsers work here are some other Hacks posts you should check out:</p>
+<p><a href="https://hacks.mozilla.org/2017/05/quantum-up-close-what-is-a-browser-engine/" target="_blank" rel="noopener">Quantum Up Close: What is a browser engine?</a><br />
+<a href="https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/" target="_blank" rel="noopener">Inside a super fast CSS engine: Quantum CSS (aka Stylo)</a></p>
+    <section class="about">
+                                <h2 class="about__header">About
+                          <a class="url" href="https://twitter.com/bibydigital" rel="external me">
+                Milica Mihajlija              </a>
+                      </h3>
+                    <ul class="author-meta fa-ul"><li><i class="fa-li fa fa-globe"></i><a href="https://twitter.com/bibydigital" class="website" rel="me">https://twitter.com/bibydigital</a></li><li><i class="fa-li fa fa-twitter"></i><a href="http://twitter.com/bibydigital" class="twitter" rel="me">@bibydigital</a></li></ul>            <p><a class="url" href="https://hacks.mozilla.org/author/mihajlijagmail-com/">More articles by Milica Mihajlija&hellip;</a></p>
+                  </section>
+  </article>
+  <section class="promo">
+    <form id="newsletterForm" name="newsletter-form" class="newsletter block block--1 block--polite" action="https://www.mozilla.org/en-US/newsletter/" method="post">
+  <h2 class="heading">Discover great resources for web development</h2>
+  <p class="newsletter__description">Sign up for the Mozilla Developer Newsletter:</p>
+  <input id="fmt" name="fmt" value="H" type="hidden">
+  <input id="newsletterNewslettersInput" name="newsletters" value="app-dev" type="hidden">
+
+  <div id="newsletterErrors" class="newsletter__errors"></div>
+
+  <div id="newsletterEmail" class="form__row">
+    <label for="newsletterEmailInput" class="offscreen">E-mail</label>
+    <input id="newsletterEmailInput" name="email" class="newsletter__input" required="" placeholder="you@example.com" size="30" type="email">
+  </div>
+
+  <div id="newsletterPrivacy" class="form__row form__fineprint">
+    <input id="newsletterPrivacyInput" name="privacy" required="" type="checkbox">
+    <label for="newsletterPrivacyInput">
+      I'm okay with Mozilla handling my info as explained in this <a href="https://www.mozilla.org/privacy/">Privacy Policy</a>.
+    </label>
+  </div>
+  <button id="newsletter-submit" type="submit" class="button positive">Sign up now</button>
+</form>
+<div id="newsletterThanks" class="newsletter newsletter--thanks block block--1 block--polite hidden">
+  <h2 class="heading">Thanks! Please check your inbox to confirm your subscription.</h2>
+  <p>If you haven’t previously confirmed a subscription to a Mozilla-related newsletter you may have to do so. Please check your inbox or your spam filter for an email from us.
+  </p>
+</div>
+  </section>
+  
+
+<section class="discussion">
+  <hr class="dino">
+  <div class="comments">
+    <header class="comments__head">
+      <h3>30 comments</h3>
+    </header>
+
+          <ol class="comments__list" class="hfeed">
+      
+ <li id="comment-21728" class="comment even thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Jerry</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Great article, preload of images is a missed key to preformance as well as grasping that EVERY image requires a call to the website. CSS Grid layout can help with correct loading of a page as well.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21728" rel="bookmark" title="Permanent link to this comment by Jerry"><abbr class="published" title="2017-09-14">September 14th, 2017</abbr> at 09:52</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21729" class="comment odd alt thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Victor</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Good read.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21729" rel="bookmark" title="Permanent link to this comment by Victor"><abbr class="published" title="2017-09-14">September 14th, 2017</abbr> at 09:54</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21730" class="comment even thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Wellington Torrejais da Silva</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Nice!</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21730" rel="bookmark" title="Permanent link to this comment by Wellington Torrejais da Silva"><abbr class="published" title="2017-09-14">September 14th, 2017</abbr> at 11:06</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21731" class="comment odd alt thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Ardil</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Great article!<br />
+Never thought of think&#8217;s before.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21731" rel="bookmark" title="Permanent link to this comment by Ardil"><abbr class="published" title="2017-09-14">September 14th, 2017</abbr> at 11:18</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21733" class="comment even thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Leon</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Awesome article. With the complexity of modern web applications it is becoming more important that developers get a deep understanding of how there sites will be executed</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21733" rel="bookmark" title="Permanent link to this comment by Leon"><abbr class="published" title="2017-09-14">September 14th, 2017</abbr> at 15:23</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21737" class="comment odd alt thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">sankar mookerjee</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Nice Article.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21737" rel="bookmark" title="Permanent link to this comment by sankar mookerjee"><abbr class="published" title="2017-09-14">September 14th, 2017</abbr> at 17:45</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21738" class="comment even thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Li Yan</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Very good article, tell important things clearly</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21738" rel="bookmark" title="Permanent link to this comment by Li Yan"><abbr class="published" title="2017-09-14">September 14th, 2017</abbr> at 19:00</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21739" class="comment odd alt thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">RodM</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>I&#8217;m somewhat confused by the &#8220;Video preload example&#8221; on</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content" rel="nofollow ugc">https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content</a></p>
+<p>It appears to be preloading two different file types of the same video, only one of which will be used. So one of those preloads eats bandwidth only to be thrown away.</p>
+<p>Also I&#8217;m worried about the many sites that auto-play videos. While Firefox lets you preference away auto-play, those sites might decide to preload the videos which will eat bandwidth even if they are not played.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21739" rel="bookmark" title="Permanent link to this comment by RodM"><abbr class="published" title="2017-09-14">September 14th, 2017</abbr> at 19:20</a>
+
+      <p class="comment__util"> </p>
+  <ol class="children">
+
+ <li id="comment-21791" class="comment byuser comment-author-mihajlijagmail-com bypostauthor even depth-2">
+      <b class="comment__title vcard">
+      <cite class="author fn">Milica Mihajlija</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Hi Rod, thank you for your feedback! The MDN example was just showing type checking, but it has been updated to take the bandwidth use into account. As for the implications of preloading auto-playing videos, it&#8217;s a legitimate concern but hopefully developers will consider all aspects of performance in real world use cases.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21791" rel="bookmark" title="Permanent link to this comment by Milica Mihajlija"><abbr class="published" title="2017-09-22">September 22nd, 2017</abbr> at 04:57</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+
+ <li id="comment-21740" class="comment odd alt thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">zhaoxieluoke</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Awesome article. I like it</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21740" rel="bookmark" title="Permanent link to this comment by zhaoxieluoke"><abbr class="published" title="2017-09-14">September 14th, 2017</abbr> at 20:01</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21741" class="comment even thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">zhaoxieluoke</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Awesome article</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21741" rel="bookmark" title="Permanent link to this comment by zhaoxieluoke"><abbr class="published" title="2017-09-14">September 14th, 2017</abbr> at 20:03</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21743" class="comment odd alt thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Mohamed hussain</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Nice article and images clearly explains what is happening&#8230;.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21743" rel="bookmark" title="Permanent link to this comment by Mohamed hussain"><abbr class="published" title="2017-09-14">September 14th, 2017</abbr> at 22:21</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21744" class="comment even thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Nishant</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Excellent article.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21744" rel="bookmark" title="Permanent link to this comment by Nishant"><abbr class="published" title="2017-09-15">September 15th, 2017</abbr> at 00:19</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21745" class="comment odd alt thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">tinku</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Excellent article! Thank you very much.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21745" rel="bookmark" title="Permanent link to this comment by tinku"><abbr class="published" title="2017-09-15">September 15th, 2017</abbr> at 00:44</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21746" class="comment even thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Lalit</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Excellent article. Never realized all the aspects of DOM creation earlier. Thanks!</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21746" rel="bookmark" title="Permanent link to this comment by Lalit"><abbr class="published" title="2017-09-15">September 15th, 2017</abbr> at 01:13</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21747" class="comment odd alt thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Dickriven Chellemboyee</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Nice articles, so pretty soon, will be using preload to load important resources.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21747" rel="bookmark" title="Permanent link to this comment by Dickriven Chellemboyee"><abbr class="published" title="2017-09-15">September 15th, 2017</abbr> at 02:12</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21749" class="comment even thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">gusamasan</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>What will happen if I put all CSS, SCRIPT (in that order) into the HEAD tag?</p>
+<p>Generally, I call scripts using &#8220;onLoad&#8221; attribute of the BODY tag. Is this a bad idea?</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21749" rel="bookmark" title="Permanent link to this comment by gusamasan"><abbr class="published" title="2017-09-15">September 15th, 2017</abbr> at 06:21</a>
+
+      <p class="comment__util"> </p>
+  <ol class="children">
+
+ <li id="comment-21751" class="comment byuser comment-author-mihajlijagmail-com bypostauthor odd alt depth-2">
+      <b class="comment__title vcard">
+      <cite class="author fn">Milica Mihajlija</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>If you have CSS included before a script in the head tag, you can see the likely scenario on the diagram captioned &#8220;Parser blocking CSS&#8221;. </p>
+<p>Executing scripts using &#8220;onload&#8221; happens after the <a href="https://developer.mozilla.org/en-US/docs/Web/Events/load" rel="nofollow">load event</a>, which means after all of the content has been loaded (including images, fonts etc). It&#8217;s not bad, but it might not be optimal depending on the script. If your script is manipulating the DOM, there&#8217;s <a href="https://developer.mozilla.org/en-US/docs/Web/Events/DOMContentLoaded" rel="nofollow">DOMContentLoaded</a> event that you can use to execute the script sooner, without waiting for all of the dependent resources to load.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21751" rel="bookmark" title="Permanent link to this comment by Milica Mihajlija"><abbr class="published" title="2017-09-15">September 15th, 2017</abbr> at 07:43</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+
+ <li id="comment-21752" class="comment even thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Stimpygato</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>This was a very well written article, and did a great job of conveying some important performance concepts when developing.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21752" rel="bookmark" title="Permanent link to this comment by Stimpygato"><abbr class="published" title="2017-09-15">September 15th, 2017</abbr> at 08:34</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21755" class="comment odd alt thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Frederik</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>&gt; One thing to pay attention to when preloading fonts is that you also have to set the crossorigin attribute even if the font is on the same domain:</p>
+<p>Why is that so?</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21755" rel="bookmark" title="Permanent link to this comment by Frederik"><abbr class="published" title="2017-09-15">September 15th, 2017</abbr> at 10:40</a>
+
+      <p class="comment__util"> </p>
+  <ol class="children">
+
+ <li id="comment-21756" class="comment byuser comment-author-mihajlijagmail-com bypostauthor even depth-2">
+      <b class="comment__title vcard">
+      <cite class="author fn">Milica Mihajlija</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>This is because the CSS spec requires fonts to be fetched in <a href="https://drafts.csswg.org/css-fonts/#font-fetching-requirements" rel="nofollow">anonymous mode CORS</a>. </p>
+<p>Here&#8217;s some more context on that: <a href="https://github.com/w3c/preload/issues/32" rel="nofollow ugc">https://github.com/w3c/preload/issues/32</a></p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21756" rel="bookmark" title="Permanent link to this comment by Milica Mihajlija"><abbr class="published" title="2017-09-15">September 15th, 2017</abbr> at 10:54</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+
+ <li id="comment-21765" class="comment odd alt thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">pranabjyoti</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>I like this very much</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21765" rel="bookmark" title="Permanent link to this comment by pranabjyoti"><abbr class="published" title="2017-09-16">September 16th, 2017</abbr> at 17:34</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21769" class="comment even thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">andy</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Hi,<br />
+very nice and crisp article.<br />
+Can you tell me where/how you build these diagrams?</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21769" rel="bookmark" title="Permanent link to this comment by andy"><abbr class="published" title="2017-09-17">September 17th, 2017</abbr> at 23:50</a>
+
+      <p class="comment__util"> </p>
+  <ol class="children">
+
+ <li id="comment-21786" class="comment byuser comment-author-mihajlijagmail-com bypostauthor odd alt depth-2">
+      <b class="comment__title vcard">
+      <cite class="author fn">Milica Mihajlija</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Thanks! I use Sketch and After Effects for animating.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21786" rel="bookmark" title="Permanent link to this comment by Milica Mihajlija"><abbr class="published" title="2017-09-21">September 21st, 2017</abbr> at 13:02</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+
+ <li id="comment-21776" class="comment even thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Kartar</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>nice article</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21776" rel="bookmark" title="Permanent link to this comment by Kartar"><abbr class="published" title="2017-09-19">September 19th, 2017</abbr> at 18:47</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21796" class="comment odd alt thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">D D</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Very helpful article. I appreciate the review of existing techniques, which goes beyond advertising this new feature, and achieves a good set of advice for when existing techniques would be good to use for the same end-goal (loading performance). Much appreciated!</p>
+<p>That said, the review has all these lovely waterfall charts. Could there be another chart for ?</p>
+<p>(Okay so asking for a new chart is a big ask. I hope to undestand how it all works more practically if possible, though, so I have tried to explain how it sounds like it works. Perhaps you can let me know if this is right?):</p>
+<p>I assume (for example for a web font) the fetch would happen immediately at the beginning, in parallel along with the &#8220;speculatively parsed as being required&#8221; assets&#8230; Then be displayed as soon as the CSS and DOM were loaded enough to specify the font. Is this correct? (It took me more reading and reasoning to learn this, though, compared to the charts for other techniques!) </p>
+<p>Overall I can&#8217;t overstate: Thanks again for the very readable, beginner-friendly article. I will check out some of these techniques for my site! Gotta love the Hacks blog!</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21796" rel="bookmark" title="Permanent link to this comment by D D"><abbr class="published" title="2017-09-25">September 25th, 2017</abbr> at 09:29</a>
+
+      <p class="comment__util"> </p>
+  <ol class="children">
+
+ <li id="comment-21820" class="comment byuser comment-author-mihajlijagmail-com bypostauthor even depth-2">
+      <b class="comment__title vcard">
+      <cite class="author fn">Milica Mihajlija</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>That&#8217;s nice to hear, thank you! Your reasoning about how preload works is correct, and in hindsight, another diagram would be handy there. It&#8217;s a bit late for that now, but what I&#8217;d recommend to anyone interested in exploring this further is loading some pages that use preload and checking out the waterfall charts in the Network tab of Dev Tools. This is a <a href="https://css-tricks.com/the-critical-request/" rel="nofollow">really good blog post</a> to learn more about font loading and network requests and a good place to get started with examples is <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content" rel="nofollow">MDN</a>.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21820" rel="bookmark" title="Permanent link to this comment by Milica Mihajlija"><abbr class="published" title="2017-09-27">September 27th, 2017</abbr> at 04:22</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+
+ <li id="comment-21817" class="comment odd alt thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Murat</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Thanks for nice article, i learned really interesting things</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21817" rel="bookmark" title="Permanent link to this comment by Murat"><abbr class="published" title="2017-09-27">September 27th, 2017</abbr> at 01:41</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21850" class="comment even thread-odd thread-alt depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Brian Ball</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Very well thought out article.</p>
+<p>I&#8217;ll be sharing this as an example of crisp writing that doesn&#8217;t lead one into story land &#8211; as some good writers are want to do.</p>
+<p>Information: DELIVERED Thx!</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21850" rel="bookmark" title="Permanent link to this comment by Brian Ball"><abbr class="published" title="2017-09-30">September 30th, 2017</abbr> at 11:06</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+
+ <li id="comment-21853" class="comment odd alt thread-even depth-1">
+      <b class="comment__title vcard">
+      <cite class="author fn">Motasem Aghbar</cite>
+    </b>
+  
+    
+    <blockquote class="comment__body">
+      <p>Great article and very helpful information!.</p>
+    </blockquote>
+
+    <a class="comment__meta" href="https://hacks.mozilla.org/2017/09/building-the-dom-faster-speculative-parsing-async-defer-and-preload/#comment-21853" rel="bookmark" title="Permanent link to this comment by Motasem Aghbar"><abbr class="published" title="2017-10-01">October 1st, 2017</abbr> at 05:58</a>
+
+      <p class="comment__util"> </p>
+  </li><!-- #comment-## -->
+      </ol>
+      </div>
+
+<p class="comments__closed"><b>Comments are closed for this article.</b></p>
+
+
+</main><!-- /#content-main -->
+
+  
+
+    <footer class="footer section section--fullwidth">
+      <div class="row">
+        <p class="block block--1">
+          Except where otherwise noted, content on this site is licensed
+          under the
+          <a href="https://creativecommons.org/licenses/by-sa/3.0/" rel="license external">Creative Commons Attribution Share-Alike License v3.0</a>
+          or any later version.
+        </p>
+        <img class="footer__logo" alt="the Mozilla dino logo" src="https://hacks.mozilla.org/wp-content/themes/Hax/img/dino.svg">
+      </div>
+    </footer>
+  </div>
+  <link rel='stylesheet' id='hljstheme-css' href='https://hacks.mozilla.org/wp-content/plugins/wp-code-highlightjs/styles/solarized-light.css?ver=0.6.2' type='text/css' media='all' />
+<script type='text/javascript' src='https://hacks.mozilla.org/wp-content/plugins/wp-code-highlightjs/highlight.common.pack.js?ver=0.6.2' id='hljs_preload-js'></script>
+<script type='text/javascript' src='https://hacks.mozilla.org/wp-content/plugins/wp-code-highlightjs/highlight.custom.pack.js?ver=0.6.2' id='hljs-js'></script>
+    <style>pre.hljs {padding: 5px;}
+pre.hljs code {}</style>
+    <script type="text/javascript">
+    (function($, window) {
+        var init_fn_flag = false;
+        var init_fn = (function() {
+            if (init_fn_flag)
+                return;
+            init_fn_flag = true;
+             hljs.configure({"tabReplace":"    "});
+            $('pre code').each(function(i, block) {
+                hljs.highlightBlock(block);
+            });
+        });
+        $(document).ready(init_fn);
+        $(window).on("load", init_fn);
+    })(jQuery, window);
+    </script>
+  <script>
+    // External links should open in a new tab.
+    (function () {
+      var postLinks = document.querySelectorAll('#content-main a');
+
+      var origin = location.origin;
+
+      for (var i = 0; i < postLinks.length; i++) {
+        var link = postLinks[i];
+        if (link.origin !== origin && !link.getAttribute('target')) {
+          link.setAttribute('target', '_blank');
+        }
+      }
+    })();
+
+    window.addEventListener('load', function () {
+      if (document.querySelector('#newsletterForm')) {
+        var script = document.createElement('script');
+        var path = document.head.getAttribute('data-template-path');
+        script.setAttribute('src', path + '/js/newsletter.js');
+        document.head.appendChild(script);
+      }
+    });
+  </script>
+</body>
+</html>
