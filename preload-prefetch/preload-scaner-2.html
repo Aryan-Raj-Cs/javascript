@@ -1,0 +1,23 @@
+<html>
+<head>
+  <script>
+      var file = window.innerWidth < 1000 ? "mobile.css" : "desktop.css";
+      document.write('<link rel="stylesheet" type="text/css" href="css/' + file + '"/>');
+  </script>
+  <!-- <link rel="stylesheet" type="text/css" href="mobile.css"/> -->
+</head>
+<body>
+   <p></p> preload scanner does not recoznize link  in script tag because it will first download parse then executed till main HTML parsing is blocked 
+    preloader scanner will make request to image url  hence it image request made earlier before it make  mobile or desktop css request<p></p>
+   <p>
+    study more about 
+    <br>
+   </p>
+<img src="img/gallery-img1.jpg" />
+<img src="img/gallery-img2.jpg" />
+<img src="img/gallery-img3.jpg" />
+<img src="img/gallery-img4.jpg" />
+<img src="img/gallery-img5.jpg" />
+<img src="img/gallery-img6.jpg" />
+</body>
+</html>
