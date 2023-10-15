@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Closure</title>
+  <script type="text/javascript">
+
+function App() {
+  const value = 'closure value'
+  const obj = {
+    myFunc:function my(){},
+    value:"obj value",
+    nestedObj:{nes:"nes"}
+}
+
+  const inputChange = ()=>{
+       console.log(value,obj)
+       submit()
+  }
+  const submit = ()=>{
+      console.log("submit",value)
+  
+  }
+  return inputChange
+  
+}
+
+const obj= App()
+obj()
+
+
+
+
+  </script>
+</head>
+<body>
+    <h1>Closure example</h1>
+
+    <div><button onClick="App()">fetch</button></button></div>
+</body>
+</html>

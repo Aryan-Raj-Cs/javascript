@@ -1,0 +1,4 @@
+function contentSniffing(){
+    console.log("content Sniffing runing")
+}
+contentSniffing()
