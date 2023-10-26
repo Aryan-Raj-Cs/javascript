@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Custom fetch and Import css in js</title>
+    <script type="module" src="./importCssInJs.js"></script>
+    <script type="text/javascript" src="./customFetch.js"></script>
+   
+    <script type="text/javascript">
+        function fetchCustomApi(){
+            customFetch('https://jsonplaceholder.typicode.com/posts/1', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error(error));
+        }
+        
+    </script>
+</head>
+
+<body>
+    <h1 >Custom fetch and Import css in js</h1>
+    <h2 id="myh2" class="heading">css is imported in js</h2>
+    <div class="myclass" id="container">
+        this css class in js is imported from js and relfected here
+
+    </div>
+    <div>
+        <a href="https://web.dev/articles/css-module-scripts">read more about css import in js</a>
+    </div>
+
+    <div class="btn-container" id="btn"><button onClick="fetchCustomApi()">fetch custom api</button></button></div>
+   
+</body>
+
+</html>

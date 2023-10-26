@@ -38,12 +38,12 @@ function customFetch(url, options) {
 }
 
 // Example usage:
-customFetch('https://jsonplaceholder.typicode.com/posts/1', {
-  method: 'GET',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-  .then(response => response.json())
-  .then(data => console.log(data))
-  .catch(error => console.error(error));
+// customFetch('https://jsonplaceholder.typicode.com/posts/1', {
+//   method: 'GET',
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// })
+//   .then(response => response.json())
+//   .then(data => console.log(data))
+//   .catch(error => console.error(error));

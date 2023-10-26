@@ -8,26 +8,73 @@
 
 function App() {
   const value = 'closure value'
+  const notClosure="not in closure"
+  const testVar = "test"
   const obj = {
     myFunc:function my(){},
     value:"obj value",
     nestedObj:{nes:"nes"}
 }
 
-  const inputChange = ()=>{
-       console.log(value,obj)
-       submit()
-  }
+  // const inputChange = ()=>{
+  //      console.log(value,obj)
+  //       // submit()
+  // }
   const submit = ()=>{
-      console.log("submit",value)
+    const inner = "inner"
+      // console.log("submit",notClosure)
+     function innerClosure(){
+      console.log("inner closure",inner)
+     }
+     return innerClosure
   
   }
-  return inputChange
+  // const test = ()=>{
+  //   submit
+  //     console.log("test",testVar)
+  
+  // }
+
+  // return inputChange
+  // return submit
+
+  return {
+    // inputChange,
+    innerClosure:submit()
+
+  }
   
 }
 
+// const obj= App()
+// const inner  = obj()
+// inner()
+
 const obj= App()
-obj()
+obj.innerClosure()
+
+function one(){
+  var one = 'one'
+  function two(){
+    var two = 'two'
+    // console.log(one)
+    function three(){
+      var three = 'three'
+      console.log(three)
+      console.log(two)
+      // console.log(one)
+    }
+    return three
+  }
+  function test(){
+    console.log(one)
+  }
+  return {
+    closure:two()
+  }
+}
+ one().closure()
+
 
 
 
