@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #container {
+      width: 300px;
+      height: 300px;
+      overflow: auto;
+      border: solid 1px red;
+    }
+
+    .target {
+      width: 100px;
+      height: 100px;
+      background-color: blue;
+      /* margin-top: 200px; */
+      border: solid 1px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div class="target">1</div>
+    <div class="target">2</div>
+    <div class="target">3</div>
+    <div class="target">4</div>
+    <div class="target">5</div>
+    <div class="target">6</div>
+    <div class="target" id ="target">7</div>
+
+  </div>
+
+  <script>
+    const container = document.getElementById('container');
+    // const target = document.querySelector('.target');
+    const target = document.getElementById('target');
+
+    const callback = (entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // The target element intersects with the container div
+          target.style.backgroundColor = 'green'; // Change the target element's background color
+        } else {
+          target.style.backgroundColor = 'blue'; // Reset the background color
+        }
+      });
+    };
+
+    const options = {
+      root: container, // Use the container as the root
+      rootMargin: '0px',
+      threshold: 0, // Intersection happens when the elements touch
+    };
+
+    const observerInstance = new IntersectionObserver(callback, options);
+
+    // Observe the target element in relation to the container
+    observerInstance.observe(target);
+  </script>
+</body>
+</html>

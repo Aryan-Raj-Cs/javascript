@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>hello</title>
+    <!-- <script type="text/javascript" src="https://fascinating-cucurucho-da6005.netlify.app/js/fake.js"></script> -->
+  <link rel="stylesheet" href="./customFetch/style.css" onload="myCssLoad()">
+  <script type="text/javascript">
+    const stylesheet = document.styleSheets[0];
+    const cssRules = stylesheet.cssRules;
+     for (const cssRule of cssRules) {
+     console.log(cssRule.cssText);
+     }
+ </script>
+  
+</head>
+<body>
+  
+    <!-- <script type="text/javascript">
+    function myCssLoad() {
+        console.log('Web page and styles have loaded.');
+      const h1 = document.getElementById('my-heading');
+      const computedStyle = getComputedStyle(h1);
+      console.log(computedStyle?.textDecorationColor)
+      //if color matches the style color of css file then onload called after the css has applied to dom 
+}
+function myImgLoad(){
+    const imageWidth = document.querySelector('img').width;
+    console.log(imageWidth,document.querySelector('img').src)
+    if (imageWidth === 0) {
+        console.log('The image has not been rendered to the screen yet');
+    } else {
+        console.log('The image has been rendered to the screen');
+    }
+}
+    </script> -->
+    <script type="text/javascript" src="https://fascinating-cucurucho-da6005.netlify.app/js/fake.js"></script>
+    <!-- <script type="text/javascript">
+       const stylesheet = document.styleSheets[0];
+       const cssRules = stylesheet.cssRules;
+        for (const cssRule of cssRules) {
+        console.log(cssRule.cssText);
+        }
+    </script> -->
+  <h1 id="my-heading" >Hello, World!</h1>
+  <p>This is a simple web page.</p>
+  <!-- <img src="" onload="myImgLoad()"> -->
+  <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0f/ba/29/5c/img-worlds-of-adventure.jpg?w=2400&h=-1&s=1" onload="myImgLoad()">
+  <script type="text/javascript">
+    window.addEventListener('load', function() {
+        console.log('Web page and styles have loaded.');
+      const h1 = document.getElementById('my-heading');
+      const computedStyle = getComputedStyle(h1);
+      console.log(computedStyle?.textDecorationColor)
+    });
+  </script>
+  <script>
+    var myModule = (function() {
+  var privateVariable = 10;
+
+  function privateFunction() {
+    return privateVariable;
+  }
+
+  function publicFunction() {
+    return privateFunction();
+
+  }
+
+  return {
+    publicFunction: publicFunction
+  };
+})();
+console.log(myModule.publicFunction());
+function Person(name, age) {
+  // Private variable
+  var privateName = name;
+  
+  // Public property
+  this.age = age;
+
+  // Public method
+  this.getName = function() {
+    return privateName;
+  };
+}
+
+var person = new Person("Alice", 30);
+console.log(person.getName()); // Access private property
+console.log(person.age); 
+console.log(person.privateName); 
+  </script>
+</body>
+</html>

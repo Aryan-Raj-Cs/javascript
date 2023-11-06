@@ -1,5 +1,5 @@
 .heading{
-    color:red
+    color:blue;
 }
 .myclass{
     color:blue;
@@ -8,4 +8,10 @@
 }
 .btn-container{
     margin-top:20px;
+}
+title{
+    color:red
+}
+h1{
+    color:blue;
 }
