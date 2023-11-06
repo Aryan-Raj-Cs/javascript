@@ -49,7 +49,7 @@
     const options = {
       root: container, // Use the container as the root
       rootMargin: '0px',
-      threshold: 0, // Intersection happens when the elements touch
+      threshold: .5, // Intersection happens when the elements touch
     };
 
     const observerInstance = new IntersectionObserver(callback, options);

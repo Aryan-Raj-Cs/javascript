@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .image-container {
+      width: 300px;
+      height: 300px;
+      background-color: lightgray;
+      margin: 20px;
+    }
+    .image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="image-container">
+    <img data-src="image1.jpg" class="image" alt="Image 1">
+  </div>
+  <div class="image-container">
+    <img data-src="image2.jpg" class="image" alt="Image 2">
+  </div>
+  <div class="image-container">
+    <img data-src="image3.jpg" class="image" alt="Image 3">
+  </div>
+
+  <script>
+    const observer = new IntersectionObserver(callback, options);
+
+    function callback(entries, observer) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target.querySelector('img');
+          img.src = img.getAttribute('data-src');
+          img.style.display = 'block';
+          observer.unobserve(entry.target);
+        }
+      });
+    }
+
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1, // You can adjust the threshold as needed
+    };
+
+    const imageContainers = document.querySelectorAll('.image-container');
+
+    imageContainers.forEach(container => {
+      observer.observe(container);
+    });
+  </script>
+</body>
+</html>
