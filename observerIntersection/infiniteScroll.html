@@ -31,8 +31,10 @@
     function callback(entries, observer) {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-            observer.unobserve(entry.target);      
+            // observer.unobserve(entry.target);  
              loadMoreItems();  
+             observer.unobserve(entry.target);  
+                
             
         }
       });
@@ -43,12 +45,17 @@
       for (let i = 0; i < 30; i++) {
         const newItem = document.createElement('div');
         newItem.className = 'item';
-        newItem.textContent = 'Item ' + itemCount++;
-        content.prepend(newItem);
+        newItem.textContent = 'Item ' + i++;
+        content.append(newItem);
       }
-      const target = document.getElementById('loading')
-       observer.observe(target);
+      const target = document.createElement('div');
+      target.className = 'item';
+      target.textContent = 'loading iteam';
+      target.id = "loadingIteam"
+      content.append(target);
+      observer.observe(target);
     }
+
 
     // Initially observe the first set of items
     const target = document.getElementById('loading')
