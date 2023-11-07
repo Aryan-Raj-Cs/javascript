@@ -31,9 +31,9 @@
     function callback(entries, observer) {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-            // observer.unobserve(entry.target);  
+            observer.unobserve(entry.target);  
              loadMoreItems();  
-             observer.unobserve(entry.target);  
+            //  observer.unobserve(entry.target);  
                 
             
         }
@@ -54,6 +54,8 @@
       target.id = "loadingIteam"
       content.append(target);
       observer.observe(target);
+      console.log(document.getElementById('loadingIteam'),target)
+    //   observer.observe(document.getElementById('loadingIteam')); unexpected memory issue
     }
 
 

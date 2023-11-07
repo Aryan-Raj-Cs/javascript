@@ -3,9 +3,9 @@ self.addEventListener('install', function (event) {
     event.waitUntil(
       caches.open('aryan-cache-v38').then(function (cache) {
         return cache.addAll([
-          '/test.js',
-          '/about.html',
-          './about.js',
+          '/service-worker/test.js',
+          '/service-worker/about.html',
+          '/service-worker/about.js',
           'https://jsonplaceholder.typicode.com/todos/1',
           'https://jsonplaceholder.typicode.com/todos/2'
         ]);
@@ -55,6 +55,7 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('sync', async event => {
   if (event.tag === 'syncTasks') {
+    console.log("syncking with background")
     await syncTasksWithServer();
   }
 });
@@ -63,14 +64,24 @@ async function syncTasksWithServer() {
   const db = await openDatabase();
   const tasks = await getUnsyncedTasks(db);
 
+  // try {
+  //   const response = await fetch('https://dummy.restapiexample.com/api/v1/create', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify(tasks),
+  //   });
+
+  //   if (response.ok) {
+  //     console.log('Tasks synchronized successfully.');
+  //     await clearTasks(db);
+  //   }
+  // } catch (error) {
+  //   console.error('Error syncing tasks:', error);
+  // }
   try {
-    const response = await fetch('	https://dummy.restapiexample.com/api/v1/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(tasks),
-    });
+    const response = await fetch(' https://jsonplaceholder.typicode.com/todos/1');
 
     if (response.ok) {
       console.log('Tasks synchronized successfully.');
@@ -79,6 +90,8 @@ async function syncTasksWithServer() {
   } catch (error) {
     console.error('Error syncing tasks:', error);
   }
+
+ 
 }
 
 async function openDatabase() {
