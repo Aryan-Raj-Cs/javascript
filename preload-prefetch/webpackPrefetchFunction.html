@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prefetch Example</title>
+  <link  href="./js/index.js" as="script">
+  <link rel="preload" href="./style/stylesheet.css" as="style">
+  <link rel="stylesheet" href="./style/stylesheet.css" as="style">
+</head>
+<body>
+
+<!-- Content of the page -->
+
+<script>
+  // Simulate loading initialScript.js
+  document.addEventListener('DOMContentLoaded', function() {
+    // Simulate loading additional styles after initial script
+    const prefetchScript = document.createElement('link');
+    prefetchScript.rel = 'prefetch';
+    prefetchScript.href = './js/about.js';
+    document.head.appendChild(prefetchScript);
+    const prefetchHtml = document.createElement('link');
+    prefetchHtml.rel = 'prefetch';
+    prefetchHtml.href = './about.html';
+    document.head.appendChild(prefetchHtml);
+  });
+</script>
+
+<h1>Webpack Prefetching functionality</h1>
+<a href="./about.html"> about</a>
+</body>
+</html>
