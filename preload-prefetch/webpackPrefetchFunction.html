@@ -14,7 +14,19 @@
 
 <script>
   // Simulate loading initialScript.js
-  document.addEventListener('DOMContentLoaded', function() {
+//   document.addEventListener('DOMContentLoaded', function() {
+//     // Simulate loading additional styles after initial script
+//     const prefetchScript = document.createElement('link');
+//     prefetchScript.rel = 'prefetch';
+//     prefetchScript.href = './js/about.js';
+//     document.head.appendChild(prefetchScript);
+//     const prefetchHtml = document.createElement('link');
+//     prefetchHtml.rel = 'prefetch';
+//     prefetchHtml.href = './about.html';
+//     document.head.appendChild(prefetchHtml);
+//   });
+
+window.addEventListener('load', function() {
     // Simulate loading additional styles after initial script
     const prefetchScript = document.createElement('link');
     prefetchScript.rel = 'prefetch';
