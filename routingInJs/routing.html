@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vanilla JS Routing</title>
+</head>
+<body>
+
+  <nav id="nav">
+    <ul>
+      <li><a href="/home">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div id="app">
+    <!-- Content will be dynamically updated based on the route -->
+  </div>
+
+  <script>
+    function renderContent(route) {
+      const appDiv = document.getElementById('app');
+
+      switch (route) {
+        case '/about':
+          appDiv.innerHTML = '<h2>About Page</h2>';
+          break;
+        case '/contact':
+          appDiv.innerHTML = '<h2>Contact Page</h2>';
+          break;
+        default:
+          appDiv.innerHTML = '<h2>Home Page</h2>';
+      }
+    }
+
+    function handleLinkClick(event) {
+      event.preventDefault();
+      const href = event.target.getAttribute('href');
+      navigateTo(href);
+    }
+
+    function navigateTo(route) {
+      // Update the URL without triggering a page reload
+      history.pushState(null, null, route);
+      // Render content based on the new route
+      renderContent(route);
+    }
+
+    function handlePopState() {
+      // Handle back/forward navigation
+      const route = window.location.pathname;
+      renderContent(route);
+    }
+
+    // Attach event listeners to handle navigation
+    // document.querySelectorAll('nav a').forEach(link => {
+    //   link.addEventListener('click', handleLinkClick);
+    // });
+
+    document.getElementById('nav').addEventListener('click', handleLinkClick)
+    // Listen for back/forward navigation
+    window.addEventListener('popstate', handlePopState);
+
+    // Initial content rendering when the page loads
+    window.addEventListener('load', () => {
+      const initialRoute = window.location.pathname;
+      renderContent(initialRoute);
+    });
+  </script>
+
+</body>
+</html>

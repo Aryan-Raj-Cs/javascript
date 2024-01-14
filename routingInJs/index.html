@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vanilla JS Routing</title>
+</head>
+<body>
+
+  <nav>
+    <ul>
+      <li><a href="#/">Home</a></li>
+      <li><a href="#/about">About</a></li>
+      <li><a href="#/contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div id="app">
+    <!-- Content will be dynamically updated based on the route -->
+  </div>
+
+  <script>
+    function renderContent(route) {
+      const appDiv = document.getElementById('app');
+
+      switch (route) {
+        case '/about':
+          appDiv.innerHTML = '<h2>About Page</h2>';
+          break;
+        case '/contact':
+          appDiv.innerHTML = '<h2>Contact Page</h2>';
+          break;
+        default:
+          appDiv.innerHTML = '<h2>Home Page</h2>';
+      }
+    }
+
+    function handleRouteChange() {
+      const route = window.location.hash.slice(1);
+      renderContent(route);
+    }
+
+    // Event listener for hashchange to handle route changes
+    window.addEventListener('hashchange', handleRouteChange);
+
+    // Initial content rendering when the page loads
+    window.addEventListener('load', handleRouteChange);
+  </script>
+
+</body>
+</html>
